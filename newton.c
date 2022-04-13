@@ -40,7 +40,7 @@ void plot (char *end_dados) {
     char* aux = "%lf";
     fprintf(arq_especificacao,  "set term png size 1000, 1200\n"
                                 "set output '%s'\n"
-                                "plot \"%s\" using 1:2:(arg($3+$4*{0,1})) '(%s,%s) (%s,%s)' palette", img_bacias, end_dados, aux, aux, aux, aux);
+                                "plot \"%s\" using 2:1:(arg($3+$4*{0,1})) '(%s,%s) (%s,%s)' palette", img_bacias, end_dados, aux, aux, aux, aux);
     fclose(arq_especificacao);
 
     // chamada do execvp
