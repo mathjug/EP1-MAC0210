@@ -4,6 +4,11 @@ GRUPO: Matheus Sanches Jurgensen e André Nogueira
 COMO COMPILAR: gcc -o EP1 EP1.c -lm
 */
 
+// PROBLEMAS:
+// - ponto longe da raiz gera NaN
+// - limitar número de iterações
+// - falar quando não convergiu
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -11,7 +16,7 @@ COMO COMPILAR: gcc -o EP1 EP1.c -lm
 double g1 (double x) {
     // g1(x) = x + x²/2 - e^x/4
     // Converge para as raízes x1 = -0.539836 e x3 = 2.617866
-    return (x + (pow(x, 2)/2) - (exp(x)/4));
+    return (x + (x*x/2) - (exp(x)/4));
 }
 
 double g2 (double x) {
@@ -24,10 +29,12 @@ double ponto_fixo1 (double x0, double atol) {
     // Implementa o método do ponto fixo para a função g1(x)
     double anterior;
     double xk = x0;
+    int contador = 0;
     do {
         anterior = xk;
         xk = g1(xk);
-    } while ((xk - anterior) > atol || (xk - anterior) < -atol);
+        contador++;
+    } while (((xk - anterior) > atol || (xk - anterior) < -atol) && (contador < 150));
     return xk;
 }
 
@@ -35,10 +42,12 @@ double ponto_fixo2 (double x0, double atol) {
     // Implementa o método do ponto fixo para a função g2(x)
     double anterior;
     double xk = x0;
+    int contador = 0;
     do {
         anterior = xk;
         xk = g2(xk);
-    } while ((xk - anterior) > atol || (xk - anterior) < -atol);
+        contador++;
+    } while (((xk - anterior) > atol || (xk - anterior) < -atol) && (contador < 150));
     return xk;
 }
 
