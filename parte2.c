@@ -44,7 +44,7 @@ void newton_basins (double* l, double* u, int p, double atol) {
     // [l1, u1] × [l2, u2] e gera um arquivo output.txt que contém os dados para a geração
     // da imagem das bacias (pode usar gnuplot para gerar as imagens). Os dados gerados
     // preenchem uma imagem com p1 × p2 pixels.
-    double pontos[p][4];
+    double pontos[p*p][4];
     double tamr, tami, distr, disti, aux;
     double complex z, raiz;
     double real, imag;
@@ -68,28 +68,31 @@ void newton_basins (double* l, double* u, int p, double atol) {
         aux += disti;
     }
 
+    int lin = 0;
     for (int i = 0; i < p; i++){
         real = re[i];
-        imag = im[i];
-        z = CMPLX(real, imag);
-        raiz = newton(z, atol, 100);
-        if(creal(z) == creal(raiz) && cimag(z) == cimag(raiz)){
-            pontos[i][0] = real;
-            pontos[i][1] = imag;
-            pontos[i][2] = 800; //numero maior q o numero de raizes do polinomio
-            pontos[i][3] = 800; //numero maior q o numero de raizes do polinomio
-        }
-        else{
-            pontos[i][0] = real;
-            pontos[i][1] = imag;
-            pontos[i][2] = creal(raiz);
-            pontos[i][3] = cimag(raiz);
+        for (int j = 0; j < p; j++){
+            imag = im[j];
+            z = CMPLX(real, imag);
+            raiz = newton(z, atol, 100);
+            if(creal(z) == creal(raiz) && cimag(z) == cimag(raiz)){
+                pontos[lin][0] = real;
+                pontos[lin][1] = imag;
+                pontos[lin][2] = 800; //numero maior q o numero de raizes do polinomio
+                pontos[lin][3] = 800; //numero maior q o numero de raizes do polinomio
+            }
+            else{
+                pontos[lin][0] = real;
+                pontos[lin][1] = imag;
+                pontos[lin][2] = creal(raiz);
+                pontos[lin][3] = cimag(raiz);
+            }
+            lin++;
         }
     }
 
     FILE *dados = fopen("gnu_plot.txt" ,"w");
-
-    for (int lin = 0; lin < p; lin++){
+    for (int lin = 0; lin < p*p; lin++){
         fprintf(dados, "(%.10f,%.10f) (%.10f,%.10f)\n", 
                 pontos[lin][0],pontos[lin][1],pontos[lin][2],pontos[lin][3]);
     }
@@ -97,14 +100,12 @@ void newton_basins (double* l, double* u, int p, double atol) {
     
 }
 
-
-
 int main() {
     double atol = 1e-10;
-    double real = 2.3, imag = 1.2;
-    double complex z = CMPLX(real, imag);
-    double r = -1.7, i = -0.3;
-    double complex w = CMPLX(r, i);
+    // double real = 2.3, imag = 1.2;
+    // double complex z = CMPLX(real, imag);
+    // double r = -1.7, i = -0.3;
+    // double complex w = CMPLX(r, i);
 
     double p = 100;
     double l[2] = {-2,-2};
