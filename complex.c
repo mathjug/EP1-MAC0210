@@ -15,7 +15,7 @@ complex mulc(complex a, complex b){
     rz = (ra*rb - ia*ib);
     iz = (ra*ib + ia*rb);
     printf("%f, %f\n", rz,iz);
-    
+
     z = CMPLX(rz,iz);
     return(z);
 }
@@ -32,4 +32,15 @@ int main(){
     double complex w = CMPLX(r, i);
     double complex m = mulc(z,w);
     printf("m = %.5f + %.5fi\n",creal(m), cimag(m));
+
+    r = -1.2;
+    i = 0.3;
+    double complex u = CMPLX(r, i);
+    double complex ms = 3*u;
+    printf("ms = %.5f + %.5fi\n",creal(ms), cimag(ms));
+
+    complex t = z*w;
+    printf("t = %.5f + %.5fi\n",creal(t), cimag(t));
+
+    printf("modulo(t) = %.5f\n",cabs(t));
 }
