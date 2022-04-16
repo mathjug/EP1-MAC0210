@@ -55,18 +55,22 @@ double complex newton (double complex x0, double atol, int it) {
     /*
     Aplica o método de Newton para achar uma raiz da função f (com primeira derivada f'), partindo do ponto x0.
     */
-    complex anterior;
+    complex anterior, df;
     complex xk = x0;
     int contador = 0;
-    for (int i = 0; i < it; i++){
-        do {
-            anterior = xk;
-            xk = anterior - ((evalf1(anterior))/(evalDf1(anterior)));
-            contador++;
-        } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 150)); // cabs é a norma do numero complexo
-        return xk; 
-    }
-    return(x0);
+
+    do {
+        anterior = xk;
+        df = evalDf1(anterior);
+        if (creal(df) == 0 && cimag(df) == 0) break;
+        
+        xk = anterior - ( (evalf1(anterior))/(df) ); 
+
+        contador++;
+    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < it)); // cabs é a norma do numero complexo
+    
+    if (fabs(cabs(xk) - cabs(anterior)) < atol || contador >= it) return(xk);
+    else return(x0);
 }
 
 char *newton_basins (double* l, double* u, int p, double atol) {
@@ -104,13 +108,9 @@ char *newton_basins (double* l, double* u, int p, double atol) {
         for (int j = 0; j < p; j++){
             imag = im[j];
             z = CMPLX(real, imag);
-            raiz = newton(z, atol, 100);
-            if(creal(z) == creal(raiz) && cimag(z) == cimag(raiz)) {
-                fprintf(dados, "(%.10f,%.10f) (%.10f,%.10f)\n", real, imag, 800, 800);
-                // 800 é número maior que o número de raízes do polinômio
-            }
-            else
-                fprintf(dados, "(%.10f,%.10f) (%.10f,%.10f)\n", real, imag, creal(raiz), cimag(raiz));
+            raiz = newton(z, atol, 150);
+            
+            fprintf(dados, "(%.10f,%.10f) (%.10f,%.10f)\n", real, imag, creal(raiz), cimag(raiz));
         }
     }
     fclose(dados);
@@ -153,17 +153,3 @@ int main() {
     char* output = newton_basins(l, u, p, atol);
     plot(output);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
