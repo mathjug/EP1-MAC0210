@@ -1,8 +1,11 @@
 /*
 EP1 MAC0210 PARTE 2
 GRUPO: Matheus Sanches Jurgensen e André Nogueira Ribeiro
-COMO COMPILAR: gcc -o parte2 parte2.c -lm
+COMO COMPILAR: gcc -o parte2 parte2.c -lm -w
 */
+
+// PROBLEMAS:
+// - ESTÁ PINTANDO CASOS EM QUE RETORNA NaN?
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,22 +15,11 @@ COMO COMPILAR: gcc -o parte2 parte2.c -lm
 double complex evalf1 (double complex x) {
     /*
     Calcula o valor da função f1(x) = x⁴ - 1 no ponto x
+    RAÍZES: 1, -1, i, -i
+    l[2] = {-2,-2}
+    u[2] = {2,2}
     */
     return (cpowf(x,4) - 1);
-}
-
-double complex evalf2 (double complex x) {
-    /*
-    Calcula o valor da função f2(x) = x³ - 1 no ponto x
-    */
-    return (cpowf(x,3) - 1);
-}
-
-double complex evalf3 (double complex x) {
-    /*
-    Calcula o valor da função f3(x) = x⁵ - 1 no ponto x
-    */
-    return (cpowf(x,5) - 1);
 }
 
 double complex evalDf1 (double complex x) {
@@ -37,6 +29,16 @@ double complex evalDf1 (double complex x) {
     return (4*cpowf(x,3));
 }
 
+double complex evalf2 (double complex x) {
+    /*
+    Calcula o valor da função f2(x) = x³ - 1 no ponto x
+    RAÍZES: 1, -0.5 - (sqrt(3)i/2), -0.5 + (sqrt(3)i/2)
+    l[2] = {-2,-2}
+    u[2] = {2,2}
+    */
+    return (cpowf(x,3) - 1);
+}
+
 double complex evalDf2 (double complex x) {
     /*
     Calcula o valor da derivada da função f2(x) = x³ - 1 no ponto x
@@ -44,32 +46,55 @@ double complex evalDf2 (double complex x) {
     return (3*cpowf(x,2));
 }
 
-double complex evalDf3 (double complex x) {
+double complex evalf3 (double complex x) {
     /*
-    Calcula o valor da derivada da função f3(x) = x⁵ - 1 no ponto x
+    Calcula o valor da função f3(x) = x³ - 2x² + 25x - 50 no ponto x
+    RAÍZES: 2, -5i, 5i
+    l[2] = {-5,-5}
+    u[2] = {5,5}
     */
-    return (5*cpowf(x,4));
+    return (cpowf(x,3) - 2*cpowf(x,2) + 25*x - 50);
 }
 
-double complex newton (double complex x0, double atol, int it) {
+double complex evalDf3 (double complex x) {
+    /*
+    Calcula o valor da derivada da função f3(x) = 3x² - 4x + 25 no ponto x
+    */
+    return (3*cpowf(x,2) - 4*x + 25);
+}
+
+double complex evalf4 (double complex x) {
+    /*
+    Calcula o valor da função f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10 no ponto x
+    l[2] = {-5,-5}
+    u[2] = {5,5}
+    */
+    return (cpowf(x,5) - 4*cpowf(x,4) + 10*cpowf(x,3) + cpowf(x,2) - 10);
+}
+
+double complex evalDf4 (double complex x) {
+    /*
+    Calcula o valor da derivada da função f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10 no ponto x
+    */
+    return (5*cpowf(x,4) - 16*cpowf(x,3) + 30*cpowf(x,2) + 2*x);
+}
+
+double complex newton (double complex x0, double atol) {
     /*
     Aplica o método de Newton para achar uma raiz da função f (com primeira derivada f'), partindo do ponto x0.
     */
     complex anterior, df;
     complex xk = x0;
     int contador = 0;
-
     do {
         anterior = xk;
-        df = evalDf1(anterior);
+        df = evalDf4(anterior);
         if (creal(df) == 0 && cimag(df) == 0) break;
-        
-        xk = anterior - ( (evalf1(anterior))/(df) ); 
-
+        xk = anterior - ((evalf4(anterior))/(df)); 
         contador++;
-    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < it)); // cabs é a norma do numero complexo
+    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 150)); // cabs é a norma do numero complexo
     
-    if (fabs(cabs(xk) - cabs(anterior)) < atol || contador >= it) return(xk);
+    if (fabs(cabs(xk) - cabs(anterior)) < atol || contador >= 150) return(xk);
     else return(x0);
 }
 
@@ -78,39 +103,21 @@ char *newton_basins (double* l, double* u, int p, double atol) {
     Acha as bacias de convergência da função f no domínio [l1, u1] × [l2, u2] e retorna um arquivo output.txt que
     contém os dados para a geração da imagem das bacias. Os dados gerados preenchem uma imagem com p × p pixels.
     */
-    double tamr, tami, distr, disti, aux;
-    double complex z, raiz;
     double real, imag;
-
-    tamr = u[0] - l[0];
-    tami = u[1] - l[1];
-    distr = tamr/p;
-    disti = tami/p;
-
-    double re[p];
-    double im[p];
-
-    aux = l[0];
-    for(int k = 0; k < p; k++){
-        re[k] = aux;
-        aux += distr;
-    }
-    aux = l[1];
-    for(int k = 0; k < p; k++){
-        im[k] = aux;
-        aux += disti;
-    }
-
+    double complex z, raiz;
+    double tamr = u[0] - l[0];
+    double tami = u[1] - l[1];
+    double distr = tamr/p;
+    double disti = tami/p;
     char *saida = "output.txt";
     FILE *dados = fopen(saida ,"w");
-    for (int i = 0; i < p; i++){
-        real = re[i];
-        for (int j = 0; j < p; j++){
-            imag = im[j];
+    for (int i = 0; i < p; i++) {
+        real = l[0] + distr * i;
+        for (int j = 0; j < p; j++) {
+            imag = l[1] + disti * j;
             z = CMPLX(real, imag);
-            raiz = newton(z, atol, 150);
-            
-            fprintf(dados, "(%.10f,%.10f) (%.10f,%.10f)\n", real, imag, creal(raiz), cimag(raiz));
+            raiz = newton(z, atol);
+            fprintf(dados, "(%.10f,%.10f) (%.6f,%.6f)\n", real, imag, creal(raiz), cimag(raiz));
         }
     }
     fclose(dados);
@@ -148,8 +155,8 @@ void plot (char *end_dados) {
 int main() {
     double atol = 1e-10;
     double p = 1000;
-    double l[2] = {-2,-2};
-    double u[2] = {2,2};
+    double l[2] = {-5,-5};
+    double u[2] = {5,5};
     char* output = newton_basins(l, u, p, atol);
     plot(output);
 }
