@@ -4,9 +4,6 @@ GRUPO: Matheus Sanches Jurgensen e André Nogueira Ribeiro
 COMO COMPILAR: gcc -o parte2 parte2.c -lm -w
 */
 
-// PROBLEMAS:
-// - ESTÁ PINTANDO CASOS EM QUE RETORNA NaN?
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -25,6 +22,8 @@ double complex evalf (double complex x, int funcao) {
             return (cpowf(x,3) - 2*cpowf(x,2) + 25*x - 50); // f3(x) = x³ - 2x² + 25x - 50
         case 4:
             return (cpowf(x,5) - 4*cpowf(x,4) + 10*cpowf(x,3) + cpowf(x,2) - 10); // f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10
+        case 5:
+            return (cpowf(x,6) - 1); // f5(x) = x⁶ - 1
     }
 }
 
@@ -41,6 +40,8 @@ double complex evalDf (double complex x, int funcao) {
             return (3*cpowf(x,2) - 4*x + 25);
         case 4:
             return (5*cpowf(x,4) - 16*cpowf(x,3) + 30*cpowf(x,2) + 2*x);
+        case 5:
+            return (6*cpowf(x,5));
     }
 }
 
@@ -48,19 +49,22 @@ double complex newton (double complex x0, double atol, int funcao) {
     /*
     Aplica o método de Newton para achar uma raiz da função f (com primeira derivada f'), partindo do ponto x0.
     */
-    complex anterior, f, df;
+    complex anterior, df;
     complex xk = x0;
     int contador = 0;
+    int convergiu = 1;
     do {
         anterior = xk;
         df = evalDf(anterior, funcao);
-        if (creal(df) == 0 && cimag(df) == 0) break;
+        if (creal(df) == 0 && cimag(df) == 0){ // derivada da função no ponto é zero, então não converge
+            convergiu = 0;
+            break;
+        }
         xk = anterior - (evalf(anterior, funcao)/df); 
         contador++;
     } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 150)); // cabs é a norma do número complexo
-    
-    if (fabs(cabs(xk) - cabs(anterior)) < atol || contador >= 150) return(xk);
-    else return(x0);
+    if (contador >= 150 || convergiu == 0) return(800); // caso em que não convergiu (800 não é raiz de nenhuma das funções implementadas)
+    return(xk); // convergiu
 }
 
 char *newton_basins (double* l, double* u, int p, double atol, int funcao) {
@@ -135,11 +139,11 @@ int main() {
     printf("\nA imagem gerada terá p x p pixels. Qual o valor de p? ");
     scanf("%d", &p);
     printf("\nAgora, qual das seguintes funções será analisada?\n");
-    printf("1. f1(x) = x⁴ - 1\n2. f2(x) = x³ - 1\n3. f3(x) = x³ - 2x² + 25x - 50\n4. f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10\n");
+    printf("1. f1(x) = x⁴ - 1\n2. f2(x) = x³ - 1\n3. f3(x) = x³ - 2x² + 25x - 50\n4. f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10\n5. f5(x) = x⁶ - 1\n");
     do {
         printf("\nSua escolha: ");
         scanf("%d", &funcao);
-    } while (funcao != 1 && funcao != 2 && funcao != 3 && funcao != 4);
+    } while (funcao != 1 && funcao != 2 && funcao != 3 && funcao != 4 && funcao != 5);
     char* output = newton_basins(l, u, p, atol, funcao);
     plot(output);
 }
