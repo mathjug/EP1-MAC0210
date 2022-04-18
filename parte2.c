@@ -12,93 +12,58 @@ COMO COMPILAR: gcc -o parte2 parte2.c -lm -w
 #include <math.h>
 #include <complex.h>
 
-double complex evalf1 (double complex x) {
+double complex evalf (double complex x, int funcao) {
     /*
-    Calcula o valor da função f1(x) = x⁴ - 1 no ponto x
-    RAÍZES: 1, -1, i, -i
-    l[2] = {-2,-2}
-    u[2] = {2,2}
+    Calcula o valor da função f(x) escolhida no ponto x
     */
-    return (cpowf(x,4) - 1);
+    switch(funcao) {
+        case 1:
+            return (cpowf(x,4) - 1); // f1(x) = x⁴ - 1
+        case 2:
+            return (cpowf(x,3) - 1); // f2(x) = x³ - 1
+        case 3:
+            return (cpowf(x,3) - 2*cpowf(x,2) + 25*x - 50); // f3(x) = x³ - 2x² + 25x - 50
+        case 4:
+            return (cpowf(x,5) - 4*cpowf(x,4) + 10*cpowf(x,3) + cpowf(x,2) - 10); // f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10
+    }
 }
 
-double complex evalDf1 (double complex x) {
+double complex evalDf (double complex x, int funcao) {
     /*
-    Calcula o valor da derivada da função f1(x) = x⁴ - 1 no ponto x
+    Calcula o valor da derivada da função f(x) escolhida no ponto x
     */
-    return (4*cpowf(x,3));
+    switch(funcao) {
+        case 1:
+            return (4*cpowf(x,3));
+        case 2:
+            return (3*cpowf(x,2));
+        case 3:
+            return (3*cpowf(x,2) - 4*x + 25);
+        case 4:
+            return (5*cpowf(x,4) - 16*cpowf(x,3) + 30*cpowf(x,2) + 2*x);
+    }
 }
 
-double complex evalf2 (double complex x) {
-    /*
-    Calcula o valor da função f2(x) = x³ - 1 no ponto x
-    RAÍZES: 1, -0.5 - (sqrt(3)i/2), -0.5 + (sqrt(3)i/2)
-    l[2] = {-2,-2}
-    u[2] = {2,2}
-    */
-    return (cpowf(x,3) - 1);
-}
-
-double complex evalDf2 (double complex x) {
-    /*
-    Calcula o valor da derivada da função f2(x) = x³ - 1 no ponto x
-    */
-    return (3*cpowf(x,2));
-}
-
-double complex evalf3 (double complex x) {
-    /*
-    Calcula o valor da função f3(x) = x³ - 2x² + 25x - 50 no ponto x
-    RAÍZES: 2, -5i, 5i
-    l[2] = {-5,-5}
-    u[2] = {5,5}
-    */
-    return (cpowf(x,3) - 2*cpowf(x,2) + 25*x - 50);
-}
-
-double complex evalDf3 (double complex x) {
-    /*
-    Calcula o valor da derivada da função f3(x) = 3x² - 4x + 25 no ponto x
-    */
-    return (3*cpowf(x,2) - 4*x + 25);
-}
-
-double complex evalf4 (double complex x) {
-    /*
-    Calcula o valor da função f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10 no ponto x
-    l[2] = {-5,-5}
-    u[2] = {5,5}
-    */
-    return (cpowf(x,5) - 4*cpowf(x,4) + 10*cpowf(x,3) + cpowf(x,2) - 10);
-}
-
-double complex evalDf4 (double complex x) {
-    /*
-    Calcula o valor da derivada da função f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10 no ponto x
-    */
-    return (5*cpowf(x,4) - 16*cpowf(x,3) + 30*cpowf(x,2) + 2*x);
-}
-
-double complex newton (double complex x0, double atol) {
+double complex newton (double complex x0, double atol, int funcao) {
     /*
     Aplica o método de Newton para achar uma raiz da função f (com primeira derivada f'), partindo do ponto x0.
     */
-    complex anterior, df;
+    complex anterior, f, df;
     complex xk = x0;
     int contador = 0;
     do {
         anterior = xk;
-        df = evalDf4(anterior);
+        df = evalDf(anterior, funcao);
         if (creal(df) == 0 && cimag(df) == 0) break;
-        xk = anterior - ((evalf4(anterior))/(df)); 
+        xk = anterior - (evalf(anterior, funcao)/df); 
         contador++;
-    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 150)); // cabs é a norma do numero complexo
+    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 150)); // cabs é a norma do número complexo
     
     if (fabs(cabs(xk) - cabs(anterior)) < atol || contador >= 150) return(xk);
     else return(x0);
 }
 
-char *newton_basins (double* l, double* u, int p, double atol) {
+char *newton_basins (double* l, double* u, int p, double atol, int funcao) {
     /*
     Acha as bacias de convergência da função f no domínio [l1, u1] × [l2, u2] e retorna um arquivo output.txt que
     contém os dados para a geração da imagem das bacias. Os dados gerados preenchem uma imagem com p × p pixels.
@@ -116,7 +81,7 @@ char *newton_basins (double* l, double* u, int p, double atol) {
         for (int j = 0; j < p; j++) {
             imag = l[1] + disti * j;
             z = CMPLX(real, imag);
-            raiz = newton(z, atol);
+            raiz = newton(z, atol, funcao);
             fprintf(dados, "(%.10f,%.10f) (%.6f,%.6f)\n", real, imag, creal(raiz), cimag(raiz));
         }
     }
@@ -154,9 +119,27 @@ void plot (char *end_dados) {
 
 int main() {
     double atol = 1e-10;
-    double p = 1000;
-    double l[2] = {-5,-5};
-    double u[2] = {5,5};
-    char* output = newton_basins(l, u, p, atol);
+    double l1, l2, u1, u2;
+    int p;
+    int funcao;
+    printf("Qual o valor real mínimo a ser exibido? ");
+    scanf("%lf", &l1);
+    printf("Qual o valor imaginário mínimo a ser exibido? ");
+    scanf("%lf", &l2);
+    printf("\nQual o valor real máximo a ser exibido? ");
+    scanf("%lf", &u1);
+    printf("Qual o valor imaginário máximo a ser exibido? ");
+    scanf("%lf", &u2);
+    double l[2] = {l1, l2};
+    double u[2] = {u1, u2};
+    printf("\nA imagem gerada terá p x p pixels. Qual o valor de p? ");
+    scanf("%d", &p);
+    printf("\nAgora, qual das seguintes funções será analisada?\n");
+    printf("1. f1(x) = x⁴ - 1\n2. f2(x) = x³ - 1\n3. f3(x) = x³ - 2x² + 25x - 50\n4. f4(x) = x⁵ - 4x⁴ + 10x³ + x² - 10\n");
+    do {
+        printf("\nSua escolha: ");
+        scanf("%d", &funcao);
+    } while (funcao != 1 && funcao != 2 && funcao != 3 && funcao != 4);
+    char* output = newton_basins(l, u, p, atol, funcao);
     plot(output);
 }
