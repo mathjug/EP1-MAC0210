@@ -62,8 +62,10 @@ double complex newton (double complex x0, double atol, int funcao) {
         }
         xk = anterior - (evalf(anterior, funcao)/df); 
         contador++;
-    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 150)); // cabs é a norma do número complexo
-    if (contador >= 150 || convergiu == 0) return(800); // caso em que não convergiu (800 não é raiz de nenhuma das funções implementadas)
+    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 300)); // cabs é a norma do número complexo
+    if (contador >= 300 || convergiu == 0 || isnan(creal(xk))) {
+        return(800); // caso em que não convergiu (800 não é raiz de nenhuma das funções implementadas)
+    }
     return(xk); // convergiu
 }
 
@@ -122,7 +124,7 @@ void plot (char *end_dados) {
 }
 
 int main() {
-    double atol = 1e-10;
+    double atol = 1e-8;
     double l1, l2, u1, u2;
     int p;
     int funcao;
