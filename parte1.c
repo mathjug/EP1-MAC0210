@@ -1,6 +1,7 @@
 /*
 EP1 MAC0210 PARTE 1
-GRUPO: Matheus Sanches Jurgensen e André Nogueira
+GRUPO:  Andre Nogueira Ribeiro nUSP: 12542230
+        Matheus Sanches Jurgensen nUSP: 12542199
 COMO COMPILAR: gcc -o EP1 EP1.c -lm
 */
 
@@ -35,7 +36,9 @@ double ponto_fixo1 (double x0, double atol) {
         anterior = xk;
         xk = g1(xk);
         contador++;
-    } while (((xk - anterior) > atol || (xk - anterior) < -atol) && (contador < 150));
+    } while ((fabs(xk - anterior) > atol) && (contador < 500) && (!isnan(xk)));
+    if (isnan(xk)) printf("\nDurante as iterações, valores tenderam ao infinito.");
+    printf("\nNúmero de iterações: %d\n", contador);
     return xk;
 }
 
@@ -50,14 +53,16 @@ double ponto_fixo2 (double x0, double atol) {
         anterior = xk;
         xk = g2(xk);
         contador++;
-    } while (((xk - anterior) > atol || (xk - anterior) < -atol) && (contador < 150));
+    } while ((fabs(xk - anterior) > atol) && (contador < 500) && (!isnan(xk)));
+    if (isnan(xk)) printf("\nDurante as iterações, valores tenderam ao infinito.");
+    printf("\nNúmero de iterações: %d\n", contador);
     return xk;
 }
 
 int main() {
     int funcao;
     double x0, x1;
-    double atol = 10e-10;
+    double atol = 1e-7;
     printf("A partir de qual ponto você quer executar o método do ponto fixo? ");
     scanf("%lf", &x0);
     printf("\nEscolha uma das seguintes funções para executar o método:\n");

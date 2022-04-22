@@ -1,6 +1,7 @@
 /*
 EP1 MAC0210 PARTE 2
-GRUPO: Matheus Sanches Jurgensen e André Nogueira Ribeiro
+GRUPO:  Andre Nogueira Ribeiro nUSP: 12542230
+        Matheus Sanches Jurgensen nUSP: 12542199
 COMO COMPILAR: gcc -o parte2 parte2.c -lm -w
 */
 
@@ -60,10 +61,10 @@ double complex newton (double complex x0, double atol, int funcao) {
             convergiu = 0;
             break;
         }
-        xk = anterior - (evalf(anterior, funcao)/df); 
+        xk = anterior - (evalf(anterior, funcao)/df);
         contador++;
-    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 300)); // cabs é a norma do número complexo
-    if (contador >= 300 || convergiu == 0 || isnan(creal(xk))) {
+    } while ((fabs(cabs(xk) - cabs(anterior)) > atol) && (contador < 500));
+    if (contador >= 500 || convergiu == 0 || isnan(creal(xk))) {
         return(800); // caso em que não convergiu (800 não é raiz de nenhuma das funções implementadas)
     }
     return(xk); // convergiu
